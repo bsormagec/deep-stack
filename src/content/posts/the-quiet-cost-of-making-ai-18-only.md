@@ -1,0 +1,13 @@
+---
+title: "The Quiet Cost of Making AI 18+ Only"
+dek: "Anthropic's age-assurance policy looks narrow. The trust boundary it creates is much larger."
+date: 2026-09-11
+image: "/images/the-quiet-cost-of-making-ai-18-only.webp"
+---
+A general-purpose AI assistant is starting to look less like a website and more like a regulated service counter. Anthropic now says its consumer Claude product is available only to people over 18. During account setup, users must confirm their age. If Anthropic detects signals that someone may be under 18, it can disable the account and ask the user to verify their age through Yoti. The available paths include a selfie-based age estimate, an identity document, or a verified over-18 attribute from Yoti's Digital ID app. Anthropic says it receives only a pass/fail result and does not see or store the selfie or ID image.
+The important change is the trust boundary. Age assurance asks for evidence about the person behind the account, then inserts another company into the loop. Anthropic says Yoti performs the check, deletes the submitted material after the check, and Anthropic gets a result rather than the document itself. That limits direct exposure, but the user still has to trust Claude, Yoti, the verification flow, and the policies governing them.
+A third party reduces exposure, not trust. False positives are a product bug. The system can be uncertain and interrupt a user's access, while the user has to prove it was wrong. For an AI tool embedded in a development workflow, losing project context or a coding environment is a real operational failure.
+Claude is also a general tool for writing, research, programming, and learning. The 18+ line does not distinguish between a teenager using an assistant to understand physics and a teenager using a companion product built around emotional attachment. It is enforceable, but blunt.
+The practical standard should be data minimization: return the smallest possible claim, avoid unrelated profiling, provide a recovery path that does not escalate forever into more documents, and publish meaningful error and appeal data.
+\"We do not store your ID\" is a useful sentence. It is not the whole privacy model. Moving sensitive verification to a third party narrows some risks and creates new dependencies. Design for the smallest possible claim, make false positives survivable, and assume users will judge the entire chain rather than just the company whose logo is on the login page.
+Source: Claude is only available to people over 18 years https://support.claude.com/en/articles/15171100-age-assurance-on-claude
