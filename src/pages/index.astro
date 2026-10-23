@@ -2,11 +2,20 @@
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 const posts = (await getCollection('posts')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Deep Stack by Burak',
+  url: new URL('/', Astro.site).href,
+  description: 'AI tools, local models, and the honest cost of building with them. Twice a day, a Hacker News story gets the math the press release skipped: real prices, real trade-offs, no hype.',
+  author: { '@type': 'Person', name: 'Burak' },
+  inLanguage: 'en',
+};
 ---
-<Base title="Deep Stack by Burak">
+<Base title="Deep Stack by Burak" jsonLd={jsonLd}>
   {posts.map((p) => (
     <div class="card">
-      <a href={`/p/${p.id}/`}><img src={p.data.image} alt="" /></a>
+      <a href={`/p/${p.id}/`}><img src={p.data.image} alt={p.data.title} loading="lazy" /></a>
       <div class="pad">
         <time>{p.data.date.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', timeZone:'UTC' }).toUpperCase()}</time>
         <h2><a href={`/p/${p.id}/`}>{p.data.title}</a></h2>
