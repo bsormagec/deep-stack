@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+const posts = (await getCollection('posts')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Base title="Deep Stack by Burak">
+  {posts.map((p) => (
+    <div class="card">
+      <a href={`/p/${p.id}/`}><img src={p.data.image} alt="" /></a>
+      <div class="pad">
+        <time>{p.data.date.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', timeZone:'UTC' }).toUpperCase()}</time>
+        <h2><a href={`/p/${p.id}/`}>{p.data.title}</a></h2>
+        <p>{p.data.dek}</p>
+      </div>
+    </div>
+  ))}
+</Base>
