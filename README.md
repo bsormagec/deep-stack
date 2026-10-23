@@ -15,3 +15,5 @@ publishes automatically. No dashboards, no publish-time verification codes.
 
 Note: `package-lock.json` is intentionally not tracked yet (same transfer
 limit); Vercel resolves dependencies on each build.
+
+Archive live: 118 posts (verified via API sync).
