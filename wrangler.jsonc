@@ -1,8 +1,9 @@
 // Cloudflare Workers config: serve the static Astro build from ./dist.
-// Needed for preview builds on non-main branches (`wrangler versions upload`),
-// which unlike `wrangler deploy` cannot auto-detect the framework.
+// Needed for preview builds on non-main branches (`wrangler preview`),
+// which unlike `wrangler deploy` cannot auto-detect the framework and needs a `previews` block.
 {
   "name": "deep-stack",
   "compatibility_date": "2026-10-19",
-  "assets": { "directory": "./dist" }
+  "assets": { "directory": "./dist" },
+  "previews": {}
 }
