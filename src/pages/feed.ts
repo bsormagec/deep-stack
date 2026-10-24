@@ -1,5 +1,4 @@
 import { getCollection } from 'astro:content';
-import { cleanDek } from '../lib/posts';
 
 const esc = (s) =>
   s
@@ -22,7 +21,7 @@ export async function GET({ site }) {
         `      <link>${link}</link>`,
         `      <guid isPermaLink="true">${link}</guid>`,
         `      <pubDate>${p.data.date.toUTCString()}</pubDate>`,
-        `      <description>${esc(cleanDek(p.data.dek))}</description>`,
+        `      <description>${esc(p.data.dek)}</description>`,
         '    </item>',
       ].join('\n');
     })
