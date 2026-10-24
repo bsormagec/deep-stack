@@ -1,7 +1,21 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getCollection } from 'astro:content';
-const posts = (await getCollection('posts')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+import PostCard from '../components/PostCard.astro';
+import { getSortedPosts, cleanDek, formatDate } from '../lib/posts';
+const posts = await getSortedPosts();
+const [featured, ...rest] = posts;
+const latest = rest.slice(0, 6);
+const older = rest.slice(6);
+
+// Archive grouped by month, newest first.
+const months: { label: string; posts: typeof older }[] = [];
+for (const p of older) {
+  const label = formatDate(p.data.date, { year: 'numeric', month: 'long' });
+  const last = months[months.length - 1];
+  if (last && last.label === label) last.posts.push(p);
+  else months.push({ label, posts: [p] });
+}
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
@@ -13,14 +27,107 @@ const jsonLd = {
 };
 ---
 <Base title="Deep Stack by Burak" jsonLd={jsonLd}>
-  {posts.map((p) => (
-    <div class="card">
-      <a href={`/p/${p.id}/`}><img src={p.data.image} alt={p.data.title} loading="lazy" /></a>
-      <div class="pad">
-        <time>{p.data.date.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', timeZone:'UTC' }).toUpperCase()}</time>
-        <h2><a href={`/p/${p.id}/`}>{p.data.title}</a></h2>
-        <p>{p.data.dek}</p>
-      </div>
+  <section class="hero wrap">
+    <p class="eyebrow"><span class="dot" aria-hidden="true"></span>AI tools · local models · honest costs</p>
+    <h1>The math the <span class="grad-text">press release skipped.</span></h1>
+    <p class="lede">Twice a day, a Hacker News story gets the numbers behind the headline: real prices, real trade-offs, no hype.</p>
+    <div class="actions">
+      <a class="btn primary" href={`/p/${featured.id}/`}>Read the latest</a>
+      <a class="btn" href="/feed">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3a1 1 0 0 0 0 2c7.18 0 13 5.82 13 13a1 1 0 1 0 2 0C20 9.72 13.28 3 5 3Zm0 6a1 1 0 0 0 0 2 7 7 0 0 1 7 7 1 1 0 1 0 2 0 9 9 0 0 0-9-9Zm1.5 6a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
+        Subscribe via RSS
+      </a>
+      <span class="count">{posts.length} posts and counting</span>
     </div>
-  ))}
+  </section>
+
+  <section class="wrap featured-wrap" aria-label="Latest post">
+    <PostCard post={featured} featured eager />
+  </section>
+
+  <section class="wrap" id="latest" aria-labelledby="latest-h">
+    <div class="section-head">
+      <h2 id="latest-h">Recent</h2>
+      <span class="rule" aria-hidden="true"></span>
+    </div>
+    <div class="grid">
+      {latest.map((p) => <PostCard post={p} />)}
+    </div>
+  </section>
+
+  <section class="wrap" id="archive" aria-labelledby="archive-h">
+    <div class="section-head">
+      <h2 id="archive-h">Archive</h2>
+      <span class="rule" aria-hidden="true"></span>
+    </div>
+    {months.map((m) => (
+      <div class="month">
+        <h3 class="month-label eyebrow">{m.label} <span>{m.posts.length} {m.posts.length === 1 ? 'post' : 'posts'}</span></h3>
+        <ul class="rows">
+          {m.posts.map((p) => {
+            const dek = cleanDek(p.data.dek);
+            return (
+              <li class="row">
+                <time class="row-date" datetime={p.data.date.toISOString()}>{formatDate(p.data.date, { month: 'short', day: 'numeric' })}</time>
+                <div class="row-text">
+                  <a class="row-title" href={`/p/${p.id}/`}>{p.data.title}</a>
+                  {dek && <p class="row-dek">{dek}</p>}
+                </div>
+                <img class="row-thumb" src={p.data.image} alt="" loading="lazy" decoding="async" />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </section>
 </Base>
+
+<style>
+  .hero { padding-top:clamp(40px, 7vw, 88px); padding-bottom:clamp(28px, 4vw, 44px); }
+  .hero .eyebrow { display:inline-flex; align-items:center; gap:10px; margin:0 0 18px; padding:6px 12px; border:1px solid var(--line); border-radius:999px; background:rgba(22,19,53,0.6); }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px rgba(43,202,109,0.18); }
+  .hero h1 { font-size:clamp(36px, 5.4vw + 12px, 72px); font-weight:800; letter-spacing:-0.04em; line-height:1.02; margin:0 0 18px; max-width:15ch; }
+  .lede { font-family:var(--serif); font-size:clamp(18px, 0.8vw + 14px, 22px); line-height:1.5; color:var(--ink-2); max-width:36em; margin:0 0 28px; }
+  .actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+  .btn { display:inline-flex; align-items:center; gap:8px; height:44px; padding:0 18px; border-radius:999px; border:1px solid var(--line-2); color:var(--ink); text-decoration:none; font-size:15px; font-weight:600; background:rgba(22,19,53,0.6); transition:background .15s, border-color .15s, transform .15s; }
+  .btn svg { width:16px; height:16px; color:var(--amber); }
+  .btn:hover { background:var(--panel-2); border-color:var(--muted); }
+  .btn.primary { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .btn.primary:hover { background:#fff; transform:translateY(-1px); }
+  .count { color:var(--faint); font-size:14px; margin-left:4px; }
+
+  .featured-wrap { margin-bottom:clamp(40px, 6vw, 64px); }
+  .section-head { display:flex; align-items:center; gap:16px; margin:0 0 22px; }
+  .section-head h2 { margin:0; font-size:clamp(22px, 1.4vw + 16px, 28px); font-weight:800; }
+  .rule { flex:1; height:1px; background:linear-gradient(90deg, var(--line-2), transparent); }
+  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; margin-bottom:clamp(48px, 7vw, 80px); }
+
+  .month { margin-bottom:28px; }
+  .month-label { margin:0 0 4px; padding:10px 0; color:var(--amber); position:sticky; top:calc(64px + env(safe-area-inset-top)); z-index:2; background:linear-gradient(180deg, var(--bg) 75%, rgba(13,11,35,0)); }
+  .month-label span { color:var(--faint); margin-left:6px; }
+  .rows { list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }
+  .row { position:relative; display:grid; grid-template-columns:76px 1fr 152px; gap:20px; align-items:center; padding:16px 0; border-bottom:1px solid var(--line); }
+  .row-date { font-family:var(--mono); font-size:12px; color:var(--green); text-transform:uppercase; letter-spacing:0.06em; }
+  .row-title { color:var(--ink); text-decoration:none; font-size:18px; font-weight:650; line-height:1.3; letter-spacing:-0.015em; }
+  .row-title::after { content:''; position:absolute; inset:0; }
+  .row:hover .row-title { color:var(--cyan); }
+  .row-dek { margin:4px 0 0; color:var(--muted); font-family:var(--serif); font-size:15px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+  .row-thumb { width:152px; aspect-ratio:2 / 1; object-fit:cover; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); display:block; transition:transform .3s ease, border-color .3s ease; }
+  .row:hover .row-thumb { transform:scale(1.04); border-color:var(--line-2); }
+
+  @media (max-width: 960px) {
+    .grid { grid-template-columns:repeat(2, 1fr); gap:20px; }
+  }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns:1fr; gap:16px; }
+    .count { width:100%; margin:4px 0 0; }
+    .btn { flex:1 1 auto; justify-content:center; }
+    .row { grid-template-columns:1fr 96px; gap:4px 14px; padding:14px 0; align-items:start; }
+    .row-date { grid-column:1; grid-row:1; font-size:11px; }
+    .row-text { grid-column:1; grid-row:2; }
+    .row-thumb { grid-column:2; grid-row:1 / span 2; width:96px; aspect-ratio:4 / 3; align-self:center; }
+    .row-title { font-size:16.5px; }
+    .row-dek { display:none; }
+  }
+</style>
