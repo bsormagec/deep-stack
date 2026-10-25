@@ -85,8 +85,8 @@ const jsonLd = {
 
 <style>
   .hero { padding-top:clamp(40px, 7vw, 88px); padding-bottom:clamp(28px, 4vw, 44px); }
-  .hero .eyebrow { display:inline-flex; align-items:center; margin:0 0 18px; padding:6px 14px 6px 12px; border:1px solid var(--line); border-radius:999px; background:rgba(22,19,53,0.6); }
-  .dot { display:inline-block; flex:none; width:7px; height:7px; margin:0 12px 0 2px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px rgba(43,202,109,0.18); }
+  .hero .eyebrow { position:relative; display:inline-block; margin:0 0 18px; padding:6px 14px 6px 35px; border:1px solid var(--line); border-radius:999px; background:rgba(22,19,53,0.6); }
+  .dot { position:absolute; left:15px; top:50%; width:7px; height:7px; margin-top:-3.5px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px rgba(43,202,109,0.18); }
   .hero h1 { font-size:clamp(36px, 5.4vw + 12px, 72px); font-weight:800; letter-spacing:-0.04em; line-height:1.02; margin:0 0 18px; max-width:15ch; }
   .lede { font-family:var(--serif); font-size:clamp(18px, 0.8vw + 14px, 22px); line-height:1.5; color:var(--ink-2); max-width:36em; margin:0 0 28px; }
   .actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
