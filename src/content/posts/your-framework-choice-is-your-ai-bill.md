@@ -1,0 +1,39 @@
+---
+title: "Your Framework Choice Is Now an AI Bill"
+dek: "Nolan Lawson built the same Pokémon app twelve times with Claude Opus 5.5 and measured what each framework cost. The cheapest build and the most expensive one differed by almost two to one — before a single user ever loaded the page."
+date: 2026-11-01
+image: "/images/your-framework-choice-is-your-ai-bill.webp"
+---
+The interesting thing about this benchmark is not which framework won. It is that the framework stopped being a developer-experience choice and became a meter reading.
+
+Lawson, writing on his blog on October 28, 2026, set out to answer a question the web community keeps answering with vibes: which JavaScript framework is "better for agents"? Frontends, he notes, are being rewritten on the claim that some stack works better with AI coding agents, usually with no evidence attached. So he built the evidence himself. He gave Claude Opus 5.5, at high effort, the same spec — a small but non-trivial Pokémon app backed by the PokéAPI, with search and filtering — and told it to build the app in twelve frameworks and meta-frameworks, from Astro and Next.js to Angular, SvelteKit, and a Hono plus htmx pairing. Each framework got the official MCP or skill for its tool where one existed. The output was checked against a conformance test suite, so the agent could not cheat its way to a passing build, and each framework was built five times, with the median reported. The story reached number 19 on Hacker News, with 252 points and 176 comments at the time of this run's scan.
+
+That sounds like a leaderboard. It isn't. It is a cost ledger, and the ledger is where the interesting pattern lives.
+
+## The meter reads the boilerplate
+
+Cost per run, quoted at Claude Code API list prices, ranged from $2.67 for Hono plus htmx to $4.97 for Angular, according to Lawson's tables. Astro came in at $2.76, Nuxt at $2.82, and vanilla JavaScript with Vite at $2.98, while Next.js sat in the middle at $3.14 and SvelteKit at $4.28. The spread is not a rounding error. The most expensive build cost about 86 percent more than the cheapest, for the same app, against the same spec.
+
+Tokens tell the same story from a different angle. Nuxt used the fewest tokens per run at a median 3.85 million, per Lawson's Claude Code reports, while Angular used 9.76 million — roughly two and a half times as many. Astro used 4.13 million, Next.js 4.99 million, SvelteKit 8.53 million. Time tracked cost closely: Astro finished fastest at a median 8.2 minutes, Angular slowest at 17.2 minutes, more than twice as long.
+
+Why does the same app cost twice as much in one framework as another? Lawson's explanation is refreshingly mechanical. The agent has to read the codebase before it can change it, and it pays for that reading on every run. A framework with more boilerplate, more surface area, or a tool the model does not know well forces the agent to read more before it writes anything useful. SvelteKit's agents read the SvelteKit v3 migration guide in every run, Lawson writes, probably because that version was too new to be in Opus 5.5's training data. Gracile's agents, unfamiliar with the framework, cloned its repository or read its compiled source from node_modules. Angular's cost looks like a function of total code size. None of this is a judgment on the frameworks as engineering. It is a bill for context.
+
+That distinction matters, because the usual way of comparing frameworks — bundle size, runtime speed, developer feel — measures what the user pays after the app ships. This benchmark measures what the builder pays while the app is being written, and increasingly rewritten, by an agent. In a workflow where the agent re-reads the codebase on every task, the context tax compounds. Lawson makes the point explicitly in his maintainability section: code size affects the number of tokens in future edits, which means it affects the literal cost of maintaining a codebase over time. His lines-of-code table runs from 1,370 for Hono plus htmx to 2,009 for Angular, per his median counts of non-blank source lines. The leanest build does roughly the same job as the heaviest with about 68 percent of the code, and Lawson notes it is faster to boot.
+
+## The catch is in the caveats
+
+A benchmark this neat deserves suspicion, and Lawson supplies most of it himself. This is one app, and a content-heavy one at that — closer to Wikipedia than to Figma or Gmail, in his own description. A complex dashboard, a game, or a productivity app could reorder the table. Results are stochastic: large language models roll dice, and Lawson reports wide ranges within frameworks, noting that React Router's cheapest run ($2.82) undercut Hono plus htmx's most expensive ($3.19). Tool usage was uneven, too. Nuxt's MCP was never used by the agents in any run; Next.js agents read the skill file in only one of five runs. And the dollar figures are API list prices from Claude Code, not cash Lawson spent — he is on a $100-per-month Max plan, so the builds were part of that subscription. Treat the dollars as a comparison scale, not an invoice.
+
+The quality numbers need the same care. Lighthouse performance and accessibility scores were nearly saturated across frameworks, at 98 to 100 for performance and 100 for accessibility, per Lawson's home-page measurements. The differences that did show up mostly track bundle size and architecture: Astro shipped a median 0 KiB of JavaScript, Next.js 142 KiB, and Lawson warns that Lighthouse and Core Web Vitals are biased against single-page apps, so multi-page frameworks were almost guaranteed to win on metrics like total blocking time. A benchmark that rewards shipping less JavaScript will flatter the frameworks that ship less JavaScript. That is not a flaw exactly, but it is a lens, and a lens should be named.
+
+None of that kills the result. It locates it. The claim is not "Hono plus htmx is the best framework." The claim is narrower and more useful: when agents write most of the code, the framework's surface area becomes a recurring cost, and that cost is now measurable. The same app, the same model, the same spec — and the bill still moved by nearly two to one.
+
+## For builders, the takeaway is practical
+
+Do not rewrite your frontend on this table alone. Do rewrite the way you justify a frontend choice. If your team is largely hands-free — agents writing, agents editing, agents re-reading the codebase on every ticket — then the old decision criteria are incomplete. Developer experience was the price of typing code by hand. When the agent types, the price is tokens per task, minutes per run, and lines of code the next agent has to re-read. A framework that feels good to a human and a framework that is cheap for an agent are not the same evaluation, and only one of them shows up on an invoice.
+
+The practical move is small and testable. Before your next framework decision, run your own version of Lawson's experiment at your own scale: the same feature, two candidate stacks, the same agent, a conformance check, and a token report. Measure what your stack costs to build and to change, not just what it costs to ship. If the expensive stack wins on the features your users actually feel, pay it knowingly. If it wins only because it is what the team already knows, say so out loud. That is the question Lawson ends on, and it is the right one: are you picking your stack on evidence, or are you just going with what you already know?
+
+The framework you install is no longer just a way of organizing your code. It is the context your agent will re-read, and re-pay for, on every task after this one. That is the problem with every "better for agents" claim that arrives without a number attached: the meter is already running, whether you read it or not.
+
+Source: [The AI cost of JavaScript frameworks](https://nolanlawson.com/2026/10/28/the-ai-cost-of-javascript-frameworks/)
