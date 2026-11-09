@@ -2,7 +2,8 @@
 // Needed for preview builds on non-main branches (`wrangler preview`),
 // which unlike `wrangler deploy` cannot auto-detect the framework and needs a `previews` block.
 // Page routes run through worker/index.js first so agents sending
-// `Accept: text/markdown` get the Markdown version of the page.
+// `Accept: text/markdown` get the Markdown version of the page and the
+// homepage gets its discovery Link headers; the worker also serves the API catalog.
 {
   "name": "deep-stack",
   "compatibility_date": "2026-10-19",
@@ -10,7 +11,7 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/", "/index.html", "/p/*"]
+    "run_worker_first": ["/", "/index.html", "/p/*", "/.well-known/api-catalog"]
   },
   "previews": {}
 }

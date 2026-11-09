@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+const site = Astro.site!;
+const abs = (path: string) => new URL(path, site).href;
+---
+<Base title="Content API — Deep Stack" description="Read-only, unauthenticated access to Deep Stack posts as Markdown, RSS and a sitemap.">
+  <article class="wrap api">
+    <h1>Content API</h1>
+    <div class="prose">
+      <p>Every Deep Stack post is available in machine-readable form. All endpoints are public, read-only <code>GET</code> requests with no authentication or rate-limit keys.</p>
+      <ul>
+        <li><a href="/index.md"><code>/index.md</code></a>: the site description and every post (title, URL, date and summary), newest first, as Markdown.</li>
+        <li><code>/p/&lt;slug&gt;.md</code>: one post as Markdown with YAML front matter (title, description, date, author, url, image). Example: <a href="/p/it-never-read-a-word.md"><code>/p/it-never-read-a-word.md</code></a>.</li>
+        <li><code>/p/&lt;slug&gt;/</code>: the post page. It returns HTML by default and Markdown when the request prefers it (<code>Accept: text/markdown</code>), with an <code>x-markdown-tokens</code> estimate.</li>
+        <li><a href="/feed"><code>/feed</code></a>: RSS 2.0 feed of all posts.</li>
+        <li><a href="/sitemap.xml"><code>/sitemap.xml</code></a>: XML sitemap.</li>
+      </ul>
+      <h2>Discovery</h2>
+      <ul>
+        <li>OpenAPI description: <a href="/openapi.json"><code>{abs('/openapi.json')}</code></a></li>
+        <li>API catalog (RFC 9727): <a href="/.well-known/api-catalog"><code>{abs('/.well-known/api-catalog')}</code></a></li>
+        <li>The homepage sends <code>Link</code> headers pointing to both.</li>
+      </ul>
+      <h2>Usage preferences</h2>
+      <p>Content-use preferences are declared in <a href="/robots.txt"><code>/robots.txt</code></a>: <code>Content-Signal: search=yes, ai-input=yes, ai-train=no</code>. You may use posts for search and to answer questions; you may not use them to train models.</p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .api { max-width:calc(var(--narrow) + 2 * var(--gutter)); padding-top:clamp(40px, 7vw, 88px); padding-bottom:clamp(40px, 6vw, 72px); }
+  .api h1 { font-size:clamp(34px, 3vw + 20px, 52px); font-weight:800; letter-spacing:-0.03em; line-height:1.05; margin:0 0 24px; }
+</style>
