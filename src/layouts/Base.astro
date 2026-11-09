@@ -4,6 +4,9 @@ const SITE_NAME = 'Deep Stack by Burak';
 const DEFAULT_DESC = 'AI tools, local models, and the honest cost of building with them. Twice a day, a Hacker News story gets the math the press release skipped: real prices, real trade-offs, no hype.';
 const desc = description || DEFAULT_DESC;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Markdown twin of this page (built by src/pages/index.md.ts and p/[slug].md.ts).
+const post = Astro.url.pathname.match(/^\/p\/([^/]+)\/?$/);
+const markdownHref = Astro.url.pathname === '/' ? '/index.md' : post ? `/p/${post[1]}.md` : null;
 const ogImage = new URL(image ?? '/images/og-default.webp', Astro.site);
 const year = new Date().getUTCFullYear();
 ---
@@ -21,6 +24,7 @@ const year = new Date().getUTCFullYear();
 <link rel="canonical" href={canonical} />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="alternate" type="application/rss+xml" title={SITE_NAME} href="/feed" />
+{markdownHref && <link rel="alternate" type="text/markdown" href={markdownHref} />}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=JetBrains+Mono:wght@500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400&display=swap" />

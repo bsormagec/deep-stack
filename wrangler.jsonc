@@ -1,9 +1,16 @@
 // Cloudflare Workers config: serve the static Astro build from ./dist.
 // Needed for preview builds on non-main branches (`wrangler preview`),
 // which unlike `wrangler deploy` cannot auto-detect the framework and needs a `previews` block.
+// Page routes run through worker/index.js first so agents sending
+// `Accept: text/markdown` get the Markdown version of the page.
 {
   "name": "deep-stack",
   "compatibility_date": "2026-10-19",
-  "assets": { "directory": "./dist" },
+  "main": "./worker/index.js",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/", "/index.html", "/p/*"]
+  },
   "previews": {}
 }
