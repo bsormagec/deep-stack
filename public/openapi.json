@@ -1,0 +1,93 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Deep Stack content API",
+    "version": "1.0.0",
+    "summary": "Read-only access to Deep Stack posts as Markdown, RSS and a sitemap.",
+    "description": "Every endpoint is a public, unauthenticated GET. Post pages also support content negotiation: send `Accept: text/markdown` to get Markdown instead of HTML. Content-use preferences are declared in /robots.txt (Content-Signal: search=yes, ai-input=yes, ai-train=no).",
+    "contact": { "name": "Burak", "url": "https://deepstack.bsormagec.com/" }
+  },
+  "servers": [{ "url": "https://deepstack.bsormagec.com" }],
+  "externalDocs": { "url": "https://deepstack.bsormagec.com/api/" },
+  "paths": {
+    "/index.md": {
+      "get": {
+        "operationId": "listPosts",
+        "summary": "Site description and every post (title, URL, date, summary), newest first, as Markdown.",
+        "responses": {
+          "200": { "description": "Markdown index.", "content": { "text/markdown": { "schema": { "type": "string" } } } }
+        }
+      }
+    },
+    "/p/{slug}.md": {
+      "get": {
+        "operationId": "getPostMarkdown",
+        "summary": "One post as Markdown, with YAML front matter (title, description, date, author, url, image).",
+        "parameters": [{ "$ref": "#/components/parameters/slug" }],
+        "responses": {
+          "200": { "description": "The post.", "content": { "text/markdown": { "schema": { "type": "string" } } } },
+          "404": { "description": "No post with this slug." }
+        }
+      }
+    },
+    "/p/{slug}/": {
+      "get": {
+        "operationId": "getPost",
+        "summary": "One post. HTML by default; Markdown when the request prefers text/markdown.",
+        "parameters": [
+          { "$ref": "#/components/parameters/slug" },
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string", "example": "text/markdown" },
+            "description": "Send text/markdown (preferred over text/html) to receive Markdown."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The post.",
+            "headers": {
+              "x-markdown-tokens": { "description": "Approximate token count (Markdown responses only).", "schema": { "type": "integer" } }
+            },
+            "content": {
+              "text/html": { "schema": { "type": "string" } },
+              "text/markdown": { "schema": { "type": "string" } }
+            }
+          },
+          "404": { "description": "No post with this slug." }
+        }
+      }
+    },
+    "/feed": {
+      "get": {
+        "operationId": "getFeed",
+        "summary": "RSS 2.0 feed of all posts.",
+        "responses": {
+          "200": { "description": "RSS feed.", "content": { "application/rss+xml": { "schema": { "type": "string" } } } }
+        }
+      }
+    },
+    "/sitemap.xml": {
+      "get": {
+        "operationId": "getSitemap",
+        "summary": "XML sitemap of the homepage and every post.",
+        "responses": {
+          "200": { "description": "Sitemap.", "content": { "application/xml": { "schema": { "type": "string" } } } }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "slug": {
+        "name": "slug",
+        "in": "path",
+        "required": true,
+        "description": "Post identifier, as listed in /index.md or /feed.",
+        "schema": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "example": "it-never-read-a-word"
+      }
+    }
+  }
+}
