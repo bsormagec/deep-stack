@@ -47,6 +47,8 @@ export default {
             'Content-Type': 'text/markdown; charset=utf-8',
             'Vary': 'Accept',
             'Cache-Control': 'public, max-age=0, must-revalidate',
+            // Same preferences as public/robots.txt.
+            'Content-Signal': 'search=yes, ai-input=yes, ai-train=no',
             // Rough estimate (~4 characters per token).
             'x-markdown-tokens': String(Math.ceil(text.length / 4)),
           },
