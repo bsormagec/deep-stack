@@ -12,7 +12,7 @@ That sounds like a benchmark press release. It isn't. It is a pricing announceme
 
 ## The week the frontier got undercut twice
 
-The timing is what makes this hard to dismiss as one vendor's marketing. Less than a day earlier, OpenAI released GPT-6.2: Astra's API price cut 20 percent to $8 and $40 per million input and output tokens, with Sol coming within half a point of Astra on Cognition's FrontierCode 2.0 at about a fifth of the cost. Deep Stack covered that yesterday at midday. Now Microsoft arrives with the same argument from the other direction — not a cheaper flagship, but a purpose-built model that concedes the last few points of quality and keeps most of the money.
+The timing is what makes this hard to dismiss as one vendor's marketing. Less than a day earlier, OpenAI released GPT-6.2: Astra's API price cut 20 percent to $8 and $40 per million input and output tokens, with Sol coming within half a point of Astra on Cognition's FrontierCode 2.0 at about a fifth of the cost. Deep Stack covered that at midday today. Now Microsoft arrives with the same argument from the other direction — not a cheaper flagship, but a purpose-built model that concedes the last few points of quality and keeps most of the money.
 
 Two vendors in two days, both arguing that the frontier's price is negotiable. That is a pattern, not a coincidence. The frontier labs spent three years teaching buyers to pay for the best score. The second tier of labs is now teaching them to ask what the last two percent of the score is worth — and the answer Microsoft offers is twenty times the price.
 
