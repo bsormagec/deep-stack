@@ -1,0 +1,45 @@
+---
+title: "The Model That Thinks Three Times Per Token"
+dek: "Thinking Machines' Inkling 2 Mini runs its middle layers three times for every token, and the company says the 26-billion-parameter model leads every open-weights model under 100 billion on agentic coding — while fitting in about 20 gigabytes on a laptop. The benchmark table is not the story. The story is where the thinking happens."
+date: 2026-11-20
+image: "/images/the-model-that-thinks-three-times-per-token.webp"
+---
+The interesting thing about Inkling 2 Mini is not that it scores 48.2% on DeepSWE v1.1. It is that it gets there without writing its reasoning down.
+
+A normal transformer passes each token through its layers once. Reasoning that needs more steps has to be carried out in generated text, where it can be read — and where it is billed. Inkling 2 Mini is a looped transformer: 24 layers, with the middle 12 running three times for every token. That is 48 layer applications from 24 stored layers. The model does more computation per token internally, before it ever has to verbalize a thought. Thinking Machines calls this the point of the design, and the numbers it published today make the case that the loop is doing real work.
+
+## The loop is the model
+
+The mechanism is not just "run the layers again." Each pass starts from the output of the first block, the prelude, and the second and third passes also read the middle blocks' outputs from the previous pass — a message carried forward. A learned gate merges that message in, starting fully blocked so each loop begins like a non-looped model and only gradually learns to use it.
+
+The loop's position matters. In Thinking Machines' own experiments, looping the middle layers gave a compute-equivalent gain of 1.51–1.91×, against 1.24–1.36× for looping the last layers. The middle of the network, where the abstract reasoning lives, is where repetition pays.
+
+The model itself is a mixture-of-experts design: 26.4 billion total parameters, 3.4 billion active per token, 5.4 billion weight activations per token once the looping is counted. It started training with 384 experts per layer, eight chosen at a time, and midway through training Thinking Machines pruned two-thirds of the experts — keeping the 128 most used in each layer — specifically to cut the total parameter count so the model runs faster on local hardware. The pruned model then trained on 1 trillion tokens distilled from a larger internal Inkling model to recover the performance the pruning took away, followed by supervised fine-tuning and reinforcement learning totaling 2.2 trillion tokens over 2,000 steps.
+
+It was also trained in 4-bit precision from the start: 20 layers in NVFP4, the last four in MXFP8, and the weights ship in exactly the precision they were trained in, so there is no conversion loss from quantization. Most small models you run locally arrive as a quantized afterthought. This one was built at the precision it runs at.
+
+## The meter moves inside the weights
+
+For builders, the takeaway is practical, and it is about tokens you never see. Reasoning tokens are the most expensive part of running an agent: every step of an agentic loop resends the context, and a long chain of thought is billed token by token. A model that reasons inside its own layers instead of on the page should need fewer of those tokens — and Thinking Machines' own measurements say it does. On GPQA Diamond, the variable-loop research model averaged 3,703 reasoning tokens at one pass and 1,661 at five passes, with accuracy rising. The same pattern held on DeepSWE v1.1. And in a head-to-head on its training ladder, the non-looping version cost 7.5% less compute to train but needed 140% more inference compute to match the looped version's loss on 512,000-token agentic traces. The loop is cheaper to run than the words it replaces.
+
+That is the same trade showing up in the size. The total memory footprint is about 20 gigabytes, and Thinking Machines says it runs on consumer laptops and desktop AI computers. Its researchers took it on a flight, ran it offline on a MacBook Pro with the M5 Pro chip and 48 gigabytes of memory, and built a playable flight simulator in a few minutes. At launch it runs on any Mac with at least 32 gigabytes of RAM via Ollama, and quantized GGUF versions are available through Unsloth and llama.cpp for local inference. Stanford's Hazy Research Lab and Scaling Intelligence Lab measured it on the intelligence-per-watt scale — how much energy a model needs per query to reach a given level of performance — and scored it 0.703 running on an NVIDIA DGX Spark, against 0.430 for Qwen3.6-35B-A3B, 0.159 for Gemma-4-26B-A4B, and 0.036 for Qwen3.5-27B. The per-watt number is the one that matters if the model is going to live on your desk instead of in someone else's data center.
+
+The benchmark table, all of it Thinking Machines' own measurement, is strong for the size: best among open-weights models under 100 billion total parameters on DeepSWE v1.1 (48.2%) and the Vals Index v2.2 (46.5%), 77.9% on SWE-bench Pro v2 Hard, 79.2% on SWE-bench Verified, 71.6% on Terminal-Bench v2.1, 79.0% on BrowseComp. It is not the strongest small model at everything — it scores 50.0% on MultiChallenge and 33.4% on ComplexConstraints, behind Qwen3.8-27B on both, and trails larger models on CritPt v2 and HLE-Diamond. Looping, the company says, does not let the weights store more facts; knowledge is mostly a function of total parameter count, and closed-book factual questions barely move with more passes. What improves is multi-hop reasoning, long-context retrieval, and long-horizon agentic work. The model closes the knowledge gap the other way, with search and tools: it leads its size class on BrowseComp, DeepSearchQA, and MCP Atlas.
+
+## The catch is the part you cannot read
+
+That sounds like a free lunch. It isn't.
+
+The same mechanism that saves reasoning tokens creates the one real worry about looped transformers, and Thinking Machines spends a large part of its announcement on it. A chain of thought is useful for oversight precisely because reasoning that needs more steps has to be written out to be read. Looping raises the ceiling on how much a model can do without writing anything down. Reasoning that never appears in the chain of thought cannot be caught by a chain-of-thought monitor.
+
+The company's own measurements say the effect is real but, at this scale, contained. On Think Fast, a benchmark that estimates how long a task a model can complete at 50% reliability with no chain of thought at all, the variable-loop model's no-CoT time horizon rises from 16 seconds at one pass to 37 seconds at three — more than doubling — then levels off. The reasoning it does write gets shorter: 3,703 tokens at one pass, 1,661 at five, on GPQA Diamond. But Thinking Machines says the shorter reasoning stayed legible — sentence length and the fraction of words in an English dictionary unchanged, the difference being that the model is more direct and backtracks less. It also proves bad at hiding its thinking: asked to steer its chain of thought to evade a monitor, it follows the instruction at most 0.1% of the time, against 1.3% for Qwen3.8-27B.
+
+In agentic settings, measured on LinuxArena — a control evaluation that tests whether an attacker model can complete malicious side tasks without detection — the company reports no clear trend in stealth rate with the number of looped passes, and says a monitor like Qwen3.8-27B detected almost all side-task attempts. The honest sentence in the announcement follows: agentic monitorability "will be important to track in larger-scale models, especially with architectures that allow for greater unverbalized thinking." The finding holds at 26 billion parameters. Nobody has published the same measurement at frontier scale, because no frontier looped model has been published at all.
+
+That is the honest frame for the whole release. Every figure here is Thinking Machines' own — no independent verification yet — and the Hacker News discussion, at 150 points and 14 comments, is thin and mostly enthusiastic. The gains also level off after three passes on most tasks, so the loop is not a dial you can turn forever. And the local-running claim has its own fine print: the Mac demo ran on a 48-gigabyte machine, the launch requirement is 32 gigabytes of RAM, and the headline 20-gigabyte footprint is the weights, not the whole system the model needs around it.
+
+None of that takes away from what changed. For years the way to make a model reason longer was to make it write more, and writing more is what you pay for. Inkling 2 Mini is the first widely usable model that reasons longer by thinking the same thought again inside its own layers — and it fits on a laptop while doing it. If the meter was the chain of thought, the loop just moved the meter inside the weights. The question now is whether anyone can still read it there.
+
+That is the problem worth watching.
+
+Source: [Introducing Inkling 2 Mini](https://thinkingmachines.ai/news/inkling-2-mini/)
